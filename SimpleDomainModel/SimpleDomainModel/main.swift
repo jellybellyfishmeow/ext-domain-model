@@ -8,8 +8,6 @@
 
 import Foundation
 
-print("Hello, World!")
-
 public func testMe() -> String {
     return "I have been tested"
 }
@@ -20,13 +18,44 @@ open class TestMe {
     }
 }
 
+
+protocol CustomStringConvertible {
+    var description : String {get}
+}
+
+protocol Mathematics {
+    func add(_ : Money) -> Money
+    func subtract (_ : Money) -> Money
+}
+
+extension Double {
+    var USD: Money {
+        return Money(amount: Int(self), currency: "USD")
+    }
+    var EUR: Money {
+        return Money(amount: Int(self), currency: "EUR")
+    }
+    var GBP: Money {
+        return Money(amount: Int(self), currency: "GBP")
+    }
+    var CAN: Money {
+        return Money(amount: Int(self), currency: "CAN")
+    }
+}
+
 ////////////////////////////////////
 // Money
 //
-public struct Money {
+public struct Money: CustomStringConvertible, Mathematics {
     public var amount : Int
     public var currency : String
 
+    var description : String {
+        get {
+            return currency + String(amount)
+        }
+    }
+    
     public func convert(_ to: String) -> Money {
         var mon = Double(self.amount)
         switch self.currency {
@@ -48,7 +77,7 @@ public struct Money {
         }
         return Money(amount : Int(mon), currency: to)
     }
-
+    
     public func add(_ to: Money) -> Money {
         if(self.currency == to.currency){
             return Money(amount: self.amount + to.amount, currency: to.currency)
@@ -57,11 +86,12 @@ public struct Money {
         }
     }
     
-    public func subtract(_ from: Money) -> Money {
-        if(self.currency == from.currency){
-            return Money(amount: self.amount - from.amount, currency: from.currency)
+    public func subtract(_ other: Money) -> Money {
+        if(self.currency == other.currency){
+            return Money(amount: self.amount - other.amount, currency: self.currency)
         }else{
-            return Money(amount: self.convert(from.currency).amount - from.amount, currency: from.currency)
+            let curr = self.convert(other.currency)
+            return Money(amount: curr.amount - other.amount, currency: other.currency)
         }
     }
 }
@@ -69,7 +99,7 @@ public struct Money {
 ////////////////////////////////////
 // Job
 //
-open class Job {
+open class Job: CustomStringConvertible {
     fileprivate var title : String
     fileprivate var type : JobType
 
@@ -78,6 +108,17 @@ open class Job {
     case Salary(Int)
     }
 
+    public var description: String {
+        get {
+            let desc = "The job is \(title) and it is paid $"
+            switch type {
+            case .Hourly(let pay):
+                return desc + "\(pay) per hour"
+            case .Salary(let pay):
+                return desc + "\(pay) per year"
+            }
+        }
+    }
     public init(title : String, type : JobType) {
         self.title = title
         self.type = type
@@ -105,7 +146,7 @@ open class Job {
 ////////////////////////////////////
 // Person
 //
-open class Person {
+open class Person: CustomStringConvertible {
     open var firstName : String = ""
     open var lastName : String = ""
     open var age : Int = 0
@@ -133,7 +174,12 @@ open class Person {
             }
         }
     }
-
+    var description : String {
+        get {
+            return "This person's name is \(firstName) \(lastName) and they are \(age)."
+        }
+    }
+    
     public init(firstName : String, lastName: String, age : Int) {
         self.firstName = firstName
         self.lastName = lastName
@@ -148,7 +194,7 @@ open class Person {
 ////////////////////////////////////
 // Family
 //
-open class Family {
+open class Family : CustomStringConvertible {
     fileprivate var members : [Person] = []
 
     public init(spouse1: Person, spouse2: Person) {
@@ -157,6 +203,20 @@ open class Family {
         if (spouse1.spouse == nil && spouse2.spouse == nil) {
             spouse1.spouse = spouse2
             spouse2.spouse = spouse1
+        }
+    }
+    
+    var description : String {
+        get {
+            var result = "Family members: "
+            if (members.count > 1) {
+                for person in members {
+                    result += "\(person.firstName) \(person.lastName), "
+                }
+                return result
+            } else {
+                return "This person has no family!"
+            }
         }
     }
 
