@@ -209,14 +209,10 @@ open class Family : CustomStringConvertible {
     var description : String {
         get {
             var result = "Family members: "
-            if (members.count > 1) {
-                for person in members {
-                    result += "\(person.firstName) \(person.lastName), "
-                }
-                return result
-            } else {
-                return "This person has no family!"
+            for person in members {
+                result += "\(person.firstName) \(person.lastName), "
             }
+            return result
         }
     }
 
